@@ -1,0 +1,55 @@
+//
+//  ViewController.swift
+//  CarPooling
+//
+//  Created by mjl-PC on 14/11/11.
+//  Copyright (c) 2014Äê MFFamily. All rights reserved.
+//
+
+import UIKit
+import MapKit
+import CoreLocation
+
+class ViewController: UIViewController,UIWebViewDelegate, MKMapViewDelegate,CLLocationManagerDelegate {
+
+    @IBOutlet var webView: UIWebView!
+    var mapView: MKMapView!
+    var locationManager = CLLocationManager()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        webView.delegate = self
+        let url:NSURL? = NSURL(string: "http://www.baidu.com")
+        let request:NSURLRequest = NSURLRequest(URL: url!)
+        webView.loadRequest(request)
+        
+        mapView = MKMapView()
+        mapView.delegate = self
+        mapView.showsUserLocation = true
+        mapView.mapType = MKMapType.Standard
+        
+        locationManager.delegate = self
+        locationManager.startUpdatingLocation()
+    }
+    
+    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+        return UIStatusBarStyle.LightContent
+    }
+
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    func locationManager(manager: CLLocationManager!, didUpdateToLocation newLocation: CLLocation!, fromLocation oldLocation: CLLocation!) {
+        locationManager.stopUpdatingLocation()
+        /*let zoomLevel = 5.0;
+        let viewRegion = MKCoordinateRegionMakeWithDistance(newLocation.coordinate, 2000, 2000);
+        let coords = CLLocationCoordinate2DMake(newLocation.coordinate.latitude,newLocation.coordinate.longitude);
+        let region = mapView.regionThatFits(viewRegion)// MKCoordinateRegionMake(coords, MKCoordinateSpanMake(zoomLevel, zoomLevel));
+        mapView.setRegion(region, animated: true)*/
+        NSLog("×ø±ê %3.2f  %3.2f\n", newLocation.coordinate.latitude,newLocation.coordinate.longitude)
+    }
+
+}
