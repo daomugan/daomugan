@@ -1,0 +1,261 @@
+//
+//  ViewController.swift
+//  CarPolling
+//
+//  Created by mjl-PC on 14/11/12.
+//  Copyright (c) 2014年 MFFamily. All rights reserved.
+//
+
+import UIKit
+import MediaPlayer
+//import webViewController
+
+class ViewController: UIViewController ,UINavigationControllerDelegate {
+    
+    var mediaPlayer:MPMoviePlayerController?
+    let webView = webViewController()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view, typically from a nib.
+        self.navigationController?.delegate = self
+        
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
+        
+        let url = NSBundle.mainBundle().pathForResource("test.mp4", ofType: nil)
+        mediaPlayer = MPMoviePlayerController(contentURL: NSURL(fileURLWithPath: url!))
+        mediaPlayer?.prepareToPlay()
+        self.view.addSubview(mediaPlayer!.view)
+        mediaPlayer?.shouldAutoplay = true
+        mediaPlayer?.scalingMode = MPMovieScalingMode.AspectFill
+        mediaPlayer?.repeatMode = MPMovieRepeatMode.One
+        mediaPlayer?.view.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.height)
+        mediaPlayer?.controlStyle = MPMovieControlStyle.None
+        mediaPlayer?.setFullscreen(true, animated: false)/**/
+        
+        var btnLogin:UIButton?
+        var img = UIImage(named: "button_normal")
+        if let rect = img?.size{
+            btnLogin = UIButton(frame: CGRect(x: self.view.bounds.midX - rect.width / 2, y: self.view.frame.height - rect.height * 1.2, width: rect.width, height: rect.height))
+        } else{
+            btnLogin = UIButton(frame: CGRect(x: self.view.bounds.midX - 144 / 2, y: self.view.frame.height - 57 * 1.2, width: 144, height: 57))
+        }
+        btnLogin?.setBackgroundImage(img, forState: UIControlState.Normal)
+        img = UIImage(named: "button_press")
+        btnLogin?.setBackgroundImage(img, forState: UIControlState.Highlighted)
+        /*btnLogin?.titleLabel?.font = UIFont.systemFontOfSize(18)
+        btnLogin?.setTitle("拼车啦", forState: UIControlState.Normal)
+        btnLogin?.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
+        btnLogin?.setTitleColor(UIColor.redColor(), forState: UIControlState.Highlighted)
+        btnLogin?.backgroundColor = UIColor(red: 0.2, green: 0.4, blue: 0.1, alpha: 0.95)*/
+        self.view.addSubview(btnLogin!)
+        btnLogin?.addTarget(self, action: "loginBtnClicked:", forControlEvents: UIControlEvents.TouchUpInside)
+    }
+
+    func loginBtnClicked(sender: UIButton?) {
+        mediaPlayer?.pause()
+        //mediaPlayer?.view.hidden = true
+        //self.navigationController?.popToRootViewControllerAnimated(true)
+        //self.navigationController?.setNavigationBarHidden(false, animated: true)
+        
+        self.navigationController?.pushViewController(webView, animated: true)
+        ///NSLog("AAA")
+    }
+    
+    func navigationController(navigationController: UINavigationController, didShowViewController viewController: UIViewController, animated: Bool) {
+        if viewController == self {
+            self.navigationController?.setNavigationBarHidden(true, animated: true)
+            mediaPlayer?.play()
+        }
+        //self.navigationController?.navigationBar.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: self.view.frame.width, height: 0))
+        //NSLog("SSSS")
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+    
+    override func shouldAutorotate() -> Bool {
+        return false
+    }
+
+    override func preferredStatusBarStyle() -> UIStatusBarStyle {
+        //UIApplication.sharedApplication().setStatusBarHidden(true, withAnimation:UIStatusBarAnimation.Slide)
+        return UIStatusBarStyle.Default
+    }
+
+    override func prefersStatusBarHidden() -> Bool {
+        return true
+    }
+}
+
+
+//
+//  webViewController.swift
+//  CarPolling
+//
+//  Created by mjl-PC on 14/11/12.
+//  Copyright (c) 2014年 MFFamily. All rights reserved.
+//
+
+import UIKit
+import CoreLocation
+
+class webViewController: XHYScrollingNavBarViewController,UIWebViewDelegate,CLLocationManagerDelegate {
+    
+    
+    var webView: UIWebView!
+    var locationManager = CLLocationManager()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        webView = UIWebView()
+        webView.frame = self.view.frame
+        webView.setTranslatesAutoresizingMaskIntoConstraints(false)
+        self.view.addSubview(webView)
+        webView.delegate = self
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
+        var constraint = NSLayoutConstraint(item:webView,attribute:NSLayoutAttribute.CenterX,relatedBy:NSLayoutRelation.Equal,toItem:self.view,attribute:NSLayoutAttribute.CenterX,multiplier:1.0,constant:0)
+        self.view.addConstraint(constraint)
+        
+        constraint = NSLayoutConstraint(item:webView,attribute:NSLayoutAttribute.CenterY,relatedBy:NSLayoutRelation.Equal,toItem:self.view,attribute:NSLayoutAttribute.CenterY,multiplier:1.0,constant:0)
+        self.view.addConstraint(constraint)
+        
+        constraint = NSLayoutConstraint(item:webView,attribute:NSLayoutAttribute.Top,relatedBy:NSLayoutRelation.Equal,toItem:self.view,attribute:NSLayoutAttribute.Top,multiplier:1.0,constant:0)
+        self.view.addConstraint(constraint)
+        
+        constraint = NSLayoutConstraint(item:webView,attribute:NSLayoutAttribute.Bottom,relatedBy:NSLayoutRelation.Equal,toItem:self.view,attribute:NSLayoutAttribute.Bottom,multiplier:1.0,constant:0)
+        self.view.addConstraint(constraint)
+        
+        constraint = NSLayoutConstraint(item:webView,attribute:NSLayoutAttribute.Leading,relatedBy:NSLayoutRelation.Equal,toItem:self.view,attribute:NSLayoutAttribute.Leading,multiplier:1.0,constant:0)
+        self.view.addConstraint(constraint)
+        
+        constraint = NSLayoutConstraint(item:webView,attribute:NSLayoutAttribute.Trailing,relatedBy:NSLayoutRelation.Equal,toItem:self.view,attribute:NSLayoutAttribute.Trailing,multiplier:1.0,constant:0)
+        self.view.addConstraint(constraint)
+        
+        locationManager.delegate = self
+        locationManager.startUpdatingLocation()
+        
+        self.followRollingScrollView(webView)
+    }
+    
+    override func prefersStatusBarHidden() -> Bool {
+        return true
+    }
+    
+    func locationManager(manager: CLLocationManager!, didUpdateToLocation newLocation: CLLocation!, fromLocation oldLocation: CLLocation!) {
+        locationManager.stopUpdatingLocation()
+        
+        let urlString = NSString(format: "http://suijiliao.sinaapp.com/index.php?sp_lat=%5.8f&sp_lng=%5.8f#",newLocation.coordinate.latitude,newLocation.coordinate.longitude)
+        let url:NSURL? = NSURL(string: urlString)
+        let request:NSURLRequest = NSURLRequest(URL: url!)
+        webView.loadRequest(request)
+
+        //NSLog("坐标 %3.2f  %3.2f\n", newLocation.coordinate.latitude,newLocation.coordinate.longitude)
+    }
+}
+马建龙  12:49:52
+import UIKit
+
+class XHYScrollingNavBarViewController: UIViewController,UIGestureRecognizerDelegate {
+    
+    let SCREEN_HEIGHT = UIScreen.mainScreen().bounds.size.height
+    let mark = 0 //- 判断是否ios7
+    let IOS7 = UIDevice.currentDevice().systemVersion
+    
+    
+    var scrollView:UIView?
+    var panGesture:UIPanGestureRecognizer?
+    var overLay:UIView?
+    var isHidden:Bool?
+    var NavBarFrame:CGRect?
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        NavBarFrame = self.navigationController?.navigationBar.frame
+    }
+
+    func followRollingScrollView(scrollView:UIView) {
+        self.scrollView = scrollView
+    
+        self.panGesture = UIPanGestureRecognizer()
+        self.panGesture?.delegate = self
+        self.panGesture?.minimumNumberOfTouches = 1
+        self.panGesture?.addTarget(self,action:"handlePanGesture:")
+        self.scrollView?.addGestureRecognizer(self.panGesture!)
+    
+        self.overLay = UIView(frame: NavBarFrame!)
+        self.overLay?.alpha=0
+        self.overLay?.backgroundColor = self.navigationController?.navigationBar.barTintColor
+        self.navigationController?.navigationBar.addSubview(self.overLay!)
+        self.navigationController?.navigationBar.bringSubviewToFront(self.overLay!)
+    }
+ 
+//#pragma mark - 兼容其他手势
+    func gestureRecognizer(gestureRecognizer:UIGestureRecognizer, shouldRecognizeSimultaneouslyWithGestureRecognizer otherGestureRecognizer:UIGestureRecognizer) -> Bool {
+    return true
+    }
+  
+//#pragma mark - 手势调用函数
+    func handlePanGesture(panGesture:UIPanGestureRecognizer) {
+        
+        var translation:CGPoint?
+        if let supv = self.scrollView?.superview {
+            translation = panGesture.translationInView(supv)
+        }
+    
+    //    NSLog(@"%f",translation.y);
+    //    CGFloat detai = self.lastContentset - translation.y;
+    //显示
+        if translation?.y >= 5 {
+            if self.isHidden == true {
+            
+                self.overLay?.alpha = 0
+                var navBarFrame = NavBarFrame
+                var scrollViewFrame = self.scrollView?.frame
+            
+                navBarFrame?.origin.y = 20
+                scrollViewFrame?.origin.y += 44
+                scrollViewFrame?.size.height -= 44
+            
+                UIView.animateWithDuration(0.2,animations:{ () in
+                    self.NavBarFrame = navBarFrame
+                    self.scrollView?.frame = scrollViewFrame!
+                //                if ([self.scrollView isKindOfClass:[UIScrollView class]]) {
+                //                    UIScrollView *scrollView=(UIScrollView *)self.scrollView;
+                //                    scrollView.contentOffset=CGPointMake(scrollView.contentOffset.x, scrollView.contentOffset.y+44);
+                //                }else if ([self.scrollView isKindOfClass:[UIWebView class]]){
+                //                    UIWebView *webView=(UIWebView *)self.scrollView;
+                //                    webView.scrollView.contentOffset=CGPointMake(webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.y+44);
+                //                }
+                    })
+                self.isHidden = false
+            }
+        }
+    
+        if translation?.y <= -20 {
+            if self.isHidden == false {
+                var frame = NavBarFrame
+                var scrollViewFrame = self.scrollView?.frame
+                frame?.origin.y = -24
+                scrollViewFrame?.origin.y -= 44;
+                scrollViewFrame?.size.height += 44
+            
+                UIView.animateWithDuration(0.2, animations: { () in
+                
+                    self.NavBarFrame = frame
+                    self.scrollView?.frame = scrollViewFrame!
+                
+                    }, completion: { (finished:Bool) in
+                    //self.overLay?.alpha = 1
+                })
+            
+                self.isHidden = true
+            }
+        }
+    }
+}
+
